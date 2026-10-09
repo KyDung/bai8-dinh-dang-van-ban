@@ -1,6 +1,28 @@
 /* Trình soạn mã (textarea + số dòng) và khung xem trước an toàn.
    Mã học sinh luôn được lọc rồi mới đưa vào iframe sandbox (không chạy script). */
 const Editor={
+ // Hộp thoại cảnh báo: trả về Promise<true> nếu học sinh đồng ý, false nếu hủy
+ confirm({title,message,ok='Đồng ý',cancel='Hủy'}){
+  return new Promise(resolve=>{
+   const d=document.createElement('dialog');d.className='confirm-dialog';
+   d.innerHTML=`<h3>⚠️ ${Util.esc(title)}</h3><p>${Util.esc(message)}</p><div class="actions"><button type="button" class="danger-fill" data-ok>${Util.esc(ok)}</button><button type="button" class="secondary" data-cancel>${Util.esc(cancel)}</button></div>`;
+   document.body.append(d);
+   const close=v=>{d.close();d.remove();resolve(v)};
+   d.querySelector('[data-ok]').onclick=()=>close(true);
+   d.querySelector('[data-cancel]').onclick=()=>close(false);
+   d.addEventListener('cancel',e=>{e.preventDefault();close(false)});
+   d.showModal();d.querySelector('[data-cancel]').focus();
+  });
+ },
+ // Đặt lại khung soạn mã về nội dung ban đầu sau khi học sinh đồng ý
+ async reset(textarea,original,what){
+  if(textarea.value===original){Util.toast('Mã đang giống ban đầu rồi.');return false}
+  const ok=await this.confirm({title:'Đặt lại mã ban đầu?',message:`Toàn bộ phần mã em đã viết ở ${what} sẽ bị xóa và quay về ${original?'mã ban đầu':'khung trống'}. Việc này không hoàn tác được.`,ok:'Đặt lại',cancel:'Giữ bài làm'});
+  if(!ok)return false;
+  textarea.value=original;textarea.dispatchEvent(new Event('input'));textarea.focus();
+  Util.toast('Đã đặt lại về '+(original?'mã ban đầu':'khung trống'));
+  return true;
+ },
  mount(textarea,record,onChange){
   const stats=record.typingStats||(record.typingStats={keyCount:0,changeCount:0,charsTyped:0,pasteCount:0,firstInputAt:null,lastInputAt:null});
   let old=textarea.value;

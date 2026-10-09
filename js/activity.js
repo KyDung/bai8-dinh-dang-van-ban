@@ -15,7 +15,7 @@ const Activity={
   document.querySelector('#main').innerHTML=`<div class="eyebrow">${learn?'HÌNH THÀNH KIẾN THỨC':'LUYỆN TẬP'}</div>
 <div class="activity-tabs">${tabs}</div><h1>${Util.esc(task.title)}</h1>${top}
 <div class="tip"><strong>Nhiệm vụ của em:</strong><ul class="task-list">${[].concat(task.task).map(t=>`<li>${Util.esc(t)}</li>`).join('')}</ul></div>
-<div class="workspace"><section class="editor-side"><div class="pane-head"><span>${task.file}</span><span>VIẾT MÃ HTML</span></div><div class="code-wrap"><div class="lines">1</div><textarea id="code" aria-label="Mã HTML của em" maxlength="100000" spellcheck="false" wrap="off" autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="Em bắt đầu viết mã tại đây…">${Util.esc(record.studentCode)}</textarea></div></section><section class="preview-side"><div class="pane-head"><span>KẾT QUẢ TRỰC TIẾP</span><span>Cập nhật khi em gõ</span></div><iframe id="preview" sandbox="" title="Kết quả mã HTML của em"></iframe></section></div>
+<div class="workspace"><section class="editor-side"><div class="pane-head"><span>${task.file}</span><span class="pane-tools"><span class="pane-label">VIẾT MÃ HTML</span><button type="button" id="reset-code" class="reset-btn" title="Đặt lại mã ban đầu">↺ Đặt lại</button></span></div><div class="code-wrap"><div class="lines">1</div><textarea id="code" aria-label="Mã HTML của em" maxlength="100000" spellcheck="false" wrap="off" autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="Em bắt đầu viết mã tại đây…">${Util.esc(record.studentCode)}</textarea></div></section><section class="preview-side"><div class="pane-head"><span>KẾT QUẢ TRỰC TIẾP</span><span>Cập nhật khi em gõ</span></div><iframe id="preview" sandbox="" title="Kết quả mã HTML của em"></iframe></section></div>
 <div class="actions"><button id="check-code">Kiểm tra mã →</button><span class="muted">${index+1}/${activities.length} nhiệm vụ · Tự động lưu</span></div><div id="feedback" aria-live="polite"></div><div id="practice-end"></div>`;
   document.querySelectorAll('[data-index]').forEach(b=>b.onclick=()=>{location.hash=`${kind}/${b.dataset.index}`});
   if(learn)Preview.update(document.querySelector('#sample-preview'),task.previewHtml||task.sample);
@@ -24,6 +24,7 @@ const Activity={
   const refresh=()=>{record.studentCode=textarea.value;Store.saveCode(task.id,textarea.value);App.save();Preview.update(document.querySelector('#preview'),textarea.value)};
   Editor.mount(textarea,record,()=>{record.studentCode=textarea.value;record.passed=false;record.completedAt=null;App.invalidateAfter(kind,index);refresh()});
   refresh();
+  document.querySelector('#reset-code').onclick=async()=>{if(await Editor.reset(textarea,task.starter||'','bài này')){document.querySelector('#feedback').innerHTML=''}};
   document.querySelector('#check-code').onclick=()=>{
    const result=task.validate(textarea.value);
    record.attempts++;record.passed=result.passed;
