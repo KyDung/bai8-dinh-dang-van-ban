@@ -23,5 +23,13 @@ const Validators=(()=>{
  const declOf=(el,prop)=>{for(const part of (el.getAttribute('style')||'').split(';')){const i=part.indexOf(':');if(i>0&&part.slice(0,i).trim().toLowerCase()===prop)return part.slice(i+1).trim()}return ''};
  // Số thẻ br nằm trong phần tử
  const brIn=el=>el.querySelectorAll('br').length;
- return {parseHTML,chk,result,norm,text,has,q,withText,colorOf,isConcreteColor,styleOf,declOf,brIn};
+ // Bỏ hết dấu cách để so chữ không phụ thuộc cách xuống dòng, thẻ br, khoảng trắng
+ const flat=s=>norm(s).replace(/[\s.,;:!?"“”]/g,'');
+ // Trong các đoạn p thỏa test, lấy đoạn có nhiều thẻ br nhất
+ const bestP=(d,test)=>q(d,'p').filter(test).sort((a,b)=>brIn(b)-brIn(a))[0];
+ // Dòng thông báo cụ thể khi thẻ br chưa đủ
+ const brMessage=(p,need,what)=>p?`${what.charAt(0).toUpperCase()+what.slice(1)} mới có ${brIn(p)} thẻ <br>, cần ít nhất ${need}. Mỗi chỗ muốn xuống dòng, em viết <br> (không cần thẻ đóng).`:`Chưa thấy ${what}. Em giữ nội dung trong một thẻ <p>…</p> và dùng <br> để xuống dòng.`;
+ // Thẻ viết trong dòng chú thích <!-- --> thì trình duyệt bỏ qua
+ const inComment=(html,tag)=>new RegExp('<!--[\\s\\S]*?<'+tag+'[\\s>/][\\s\\S]*?-->','i').test(html);
+ return {parseHTML,chk,result,norm,text,has,q,withText,colorOf,isConcreteColor,styleOf,declOf,brIn,flat,bestP,brMessage,inComment};
 })();

@@ -34,10 +34,17 @@ const Learning={activities:[
   effect:'Nếu chỉ có chữ liền nhau thì trình duyệt gộp thành một dòng dài. Thẻ br tách thành từng câu thơ, thẻ hr kẻ đường ngang phân cách tiêu đề với nội dung.',
   starter:'<h2>Ca dao về cha mẹ</h2>\n<!-- Thêm thẻ hr ngay dưới tiêu đề để kẻ đường ngang -->\n<p>Công cha như núi Thái Sơn Nghĩa mẹ như nước trong nguồn chảy ra Một lòng thờ mẹ kính cha Cho tròn chữ hiếu mới là đạo con.</p>\n',
   task:['Mã có sẵn tiêu đề và một đoạn ca dao viết liền một dòng.','Thêm thẻ <hr> ngay dưới tiêu đề để kẻ đường ngang.','Dùng thẻ <br> tách ca dao thành 4 dòng (cần 3 thẻ <br>).','Giữ nguyên nội dung chữ.'],
-  validate(html){const d=V.parseHTML(html),h2=d.querySelector('h2'),hr=d.querySelector('hr'),p=V.q(d,'p').find(e=>V.has(e,'công cha như núi thái sơn'));return V.result([
-   V.chk('hr',hr&&h2&&(h2.compareDocumentPosition(hr)&Node.DOCUMENT_POSITION_FOLLOWING),'Có thẻ hr nằm dưới tiêu đề','Thêm <hr> (không cần thẻ đóng) vào dòng ngay dưới thẻ h2.'),
-   V.chk('br',p&&V.brIn(p)>=3,'Đoạn ca dao được tách thành 4 dòng bằng thẻ br','Đặt <br> giữa các câu: sau “Thái Sơn”, “chảy ra” và “kính cha”.'),
-   V.chk('text',p&&V.has(p,'cho tròn chữ hiếu mới là đạo con'),'Nội dung chữ được giữ nguyên','Không xóa chữ của ca dao, chỉ thêm thẻ br.')])}},
+  validate(html){
+   const d=V.parseHTML(html),h2=d.querySelector('h2'),hr=d.querySelector('hr');
+   const lines=['công cha như núi thái sơn','nghĩa mẹ như nước trong nguồn chảy ra','một lòng thờ mẹ kính cha','cho tròn chữ hiếu mới là đạo con'];
+   const withLine=e=>lines.some(l=>V.flat(e.textContent).includes(V.flat(l)));
+   const p=V.bestP(d,withLine),manyP=V.q(d,'p').filter(withLine).length>1;
+   const missing=lines.find(l=>!V.flat(d.body.textContent).includes(V.flat(l)));
+   return V.result([
+    V.chk('hr',hr&&h2&&(h2.compareDocumentPosition(hr)&Node.DOCUMENT_POSITION_FOLLOWING),'Có thẻ hr nằm dưới tiêu đề',V.inComment(html,'hr')?'Thẻ <hr> em viết đang nằm trong dòng chú thích <!-- … -->, nên trình duyệt bỏ qua. Em viết <hr> ra ngoài chú thích (hoặc xóa dòng chú thích).':'Thêm <hr> (không cần thẻ đóng) vào dòng ngay dưới thẻ h2.'),
+    V.chk('br',p&&V.brIn(p)>=3&&!manyP,'Đoạn ca dao được tách thành 4 dòng bằng thẻ br',manyP?'Em đang chia ca dao thành nhiều thẻ <p>. Mỗi thẻ p là một đoạn riêng, cách nhau một khoảng. Muốn chỉ xuống dòng, em gộp lại thành một thẻ <p> duy nhất và đặt <br> giữa các câu.':V.brMessage(p,3,'đoạn ca dao')),
+    V.chk('text',!missing,'Nội dung chữ được giữ nguyên',missing?'Chưa thấy câu “'+missing+'”. Em kiểm tra chính tả, đừng xóa hoặc sửa chữ của ca dao.':'')])
+  }},
  {id:'learn-emphasis',name:'Nhấn mạnh chữ',title:'Thẻ định dạng kiểu chữ',file:'trang.html',
   intro:'Muốn nhấn mạnh một cụm chữ, em đặt cụm chữ đó trong cặp thẻ định dạng: <strong> chữ đậm, <em> chữ nghiêng, <mark> tô nền vàng như bút dạ quang, <del> gạch ngang chữ. Strong và em còn mang ý nghĩa “quan trọng”, nên được khuyến khích dùng hơn b và i.',
   parts:[['<p>Môn '],['<strong>','Thẻ strong: chữ đậm, nhấn mạnh nội dung quan trọng',1],['Tin học'],['</strong>','',1],[' rất '],['<em>','Thẻ em: chữ nghiêng, nhấn mạnh về mặt ý nghĩa',2],['hay'],['</em>','',2],[', '],['<mark>','Thẻ mark: tô nền vàng, đánh dấu nội dung cần chú ý',4],['nhớ ôn bài'],['</mark>','',4],[' và '],['<del>','Thẻ del: gạch ngang chữ, cho biết nội dung bị bỏ',5],['đừng học tủ'],['</del>','',5],['.</p>']],

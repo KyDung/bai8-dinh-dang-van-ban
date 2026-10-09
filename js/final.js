@@ -39,10 +39,10 @@ const Final={
  },
  validate(html){
   const V=Validators,d=V.parseHTML(html);
-  const poem=V.q(d,'p').find(p=>V.brIn(p)>=3&&V.text(p).length>=40);
+  const poem=V.q(d,'p').find(p=>V.brIn(p)>=3&&V.text(p).length>=40),bestPoem=V.bestP(d,p=>V.text(p).length>=20);
   return V.result([
    V.chk('title',V.q(d,'h1').some(e=>V.isConcreteColor(V.styleOf(e,'color'))&&V.colorOf(V.styleOf(e,'color'))),'Tiêu đề h1 có màu cụ thể (mã #… hoặc rgb) lấy từ bức tranh','Viết <h1 style="color:#ff6b3d">…</h1> với mã màu em chọn, không dùng tên màu tiếng Anh.'),
-   V.chk('lines',!!poem,'Bài thơ nằm trong một đoạn p, tách thành ít nhất 4 dòng bằng br','Đặt các câu thơ trong một thẻ p và thêm <br> cuối mỗi câu (cần ít nhất 3 thẻ br).'),
+   V.chk('lines',!!poem,'Bài thơ nằm trong một đoạn p, tách thành ít nhất 4 dòng bằng br',poem?'':V.brMessage(bestPoem,3,'đoạn thơ')),
    V.chk('hr',V.q(d,'hr').length,'Có đường kẻ ngang hr','Thêm thẻ <hr> giữa tiêu đề và bài thơ.'),
    V.chk('emphasis',V.q(d,'strong,b,em,i,mark').some(e=>V.text(e).length>0),'Có cụm chữ được nhấn mạnh (strong, em hoặc mark)','Bọc một cụm chữ trong <strong>, <em> hoặc <mark>.'),
    V.chk('font',V.q(d,'*[style]').some(e=>V.styleOf(e,'font-family')&&/^\d+(\.\d+)?(px|pt|em|rem|%)$/.test(V.declOf(e,'font-size').replace(/\s+/g,''))),'Có phần tử đặt cả font-family và font-size','Thêm vào style: font-family:Tahoma; font-size:20px (cỡ chữ có đơn vị).')
