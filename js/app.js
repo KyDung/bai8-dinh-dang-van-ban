@@ -86,30 +86,35 @@ const App={
  /* ---------- Khởi động: so sánh hai văn bản (Hình 8.1) ---------- */
  warmup(){
   const reasons=['Có tiêu đề nổi bật, to hơn chữ thường','Mỗi câu thơ nằm trên một dòng riêng','Có đường kẻ ngang ngăn cách tiêu đề và bài thơ','Có chữ nhấn mạnh (màu sắc, tô nền)'];
+  const done=this.state.warmupDone;
   document.querySelector('#main').innerHTML=`<div class="eyebrow">KHỞI ĐỘNG</div><h1>Văn bản nào đẹp hơn?</h1>
-<p class="lead">Hai văn bản dưới đây có cùng nội dung nhưng trình bày khác nhau. Em chọn văn bản em thấy đẹp và dễ đọc hơn.</p>
+<p class="lead">Hai văn bản dưới đây có cùng nội dung nhưng trình bày khác nhau. Em làm hai việc: <strong>chọn</strong> văn bản em thấy đẹp hơn, rồi <strong>chạm vào 3 phần có số ①②③</strong> của văn bản b để biết chúng là gì.</p>
 <div class="compare"><article class="doc raw"><span class="doc-tag">a)</span><div class="doc-body">Vội vàng Tôi muốn tắt nắng đi cho màu đừng nhạt mất; Tôi muốn buộc gió lại cho hương đừng bay đi.</div><button class="secondary vote" data-vote="a">Em chọn văn bản a</button></article>
-<article class="doc fancy"><span class="doc-tag">b)</span><div class="doc-body"><h3 class="part" data-part="title" tabindex="0" role="button">Vội vàng</h3><hr><p class="part" data-part="lines" tabindex="0" role="button">Tôi muốn tắt nắng đi<br>Cho màu đừng nhạt mất;<br>Tôi muốn buộc gió lại<br>Cho hương đừng bay đi.</p><p><span class="part hl" data-part="emph" tabindex="0" role="button">Xuân Diệu</span></p></div><button class="secondary vote" data-vote="b">Em chọn văn bản b</button></article></div>
-<div class="panel" id="warm-result" role="status"><h3>Em chọn văn bản nào?</h3><p>Hãy bấm nút chọn dưới một trong hai văn bản.</p></div>
-<div class="panel" id="warm-parts" hidden><h3>Khám phá các thành phần của văn bản b</h3><p>Bấm vào <strong>tiêu đề</strong>, <strong>các câu thơ</strong> và <strong>tên tác giả được tô nền</strong> trong văn bản b để biết chúng là thành phần gì. <span class="muted">Đã khám phá <b id="part-count">0</b>/3.</span></p><div id="part-note" class="part-note"></div></div>
-<div class="panel" id="warm-next" hidden><h3>Vì sao văn bản b đẹp hơn?</h3><ul class="reason-list">${reasons.map(r=>`<li>${r}</li>`).join('')}</ul><p class="muted">Các điểm này đều làm được bằng thẻ HTML. Em sẽ học từng thẻ ở bước sau.</p><button id="finish-warmup" ${this.state.warmupDone?'':'disabled'}>Học các thẻ định dạng →</button></div>`;
-  const found=new Set(),notes={title:'Tiêu đề: dòng chữ to, đứng đầu văn bản. Trong HTML dùng thẻ h1 đến h6.',lines:'Đoạn văn: các câu thơ nằm trong cùng một đoạn, mỗi câu một dòng. Trong HTML dùng thẻ p và br để xuống dòng.',emph:'Chữ nhấn mạnh: được tô nền để nổi bật. Trong HTML dùng thẻ như mark, strong, em hoặc thuộc tính style.'};
+<article class="doc fancy"><span class="doc-tag">b)</span><div class="doc-body"><h3 class="part" data-part="title" data-n="1" tabindex="0" role="button">Vội vàng</h3><hr><p class="part" data-part="lines" data-n="2" tabindex="0" role="button">Tôi muốn tắt nắng đi<br>Cho màu đừng nhạt mất;<br>Tôi muốn buộc gió lại<br>Cho hương đừng bay đi.</p><p><span class="part hl" data-part="emph" data-n="3" tabindex="0" role="button">Xuân Diệu</span></p></div><button class="secondary vote" data-vote="b">Em chọn văn bản b</button></article></div>
+<div class="panel" id="warm-result" role="status"><h3>Em chọn văn bản nào?</h3><p>Bấm nút “Em chọn…” dưới một trong hai văn bản.</p></div>
+<div class="panel" id="warm-next"><h3>Vì sao văn bản b đẹp hơn?</h3><ul class="reason-list">${reasons.map(r=>`<li>${r}</li>`).join('')}</ul><p class="muted">Các điểm này đều làm được bằng thẻ HTML. Em sẽ học từng thẻ ở bước sau.</p></div>
+<div class="warm-bar${done?' ready':''}"><div class="warm-msg"><b id="warm-count" class="warm-count">${done?'3/3':'0/3'}</b><span id="warm-text">${done?'Em đã khám phá xong. Bấm “Tiếp tục” để học các thẻ định dạng.':'Chạm vào phần có số ①②③ trong văn bản b (kéo xuống một chút).'}</span></div><button id="finish-warmup" ${done?'':'disabled'}>Tiếp tục →</button></div>`;
+  const found=new Set(done?['title','lines','emph']:[]),notes={title:'① Tiêu đề: dòng chữ to, đứng đầu. Trong HTML dùng thẻ h1 đến h6.',lines:'② Đoạn văn: các câu thơ nằm cùng một đoạn, mỗi câu một dòng. Dùng thẻ p và br.',emph:'③ Chữ nhấn mạnh: được tô nền cho nổi bật. Dùng mark, strong, em hoặc style.'};
+  const bar=document.querySelector('.warm-bar'),text=document.querySelector('#warm-text'),count=document.querySelector('#warm-count'),finish=document.querySelector('#finish-warmup');
   const result=document.querySelector('#warm-result');
   document.querySelectorAll('[data-vote]').forEach(b=>b.onclick=()=>{
    const pick=b.dataset.vote;
-   result.innerHTML=pick==='b'?'<h3>Đúng rồi, văn bản b đẹp hơn!</h3><p>Em tiếp tục khám phá xem văn bản b được tạo nên từ những thành phần nào.</p>':'<h3>Em chọn văn bản a, có thể em thích sự gọn gàng.</h3><p>Nhưng hầu hết người đọc thấy văn bản b rõ ràng, dễ đọc hơn. Em hãy khám phá văn bản b để biết vì sao.</p>';
-   document.querySelector('#warm-parts').hidden=false;
+   result.innerHTML=pick==='b'?'<h3>Đúng rồi, văn bản b đẹp hơn!</h3><p>Em chạm vào 3 phần có số ①②③ trong văn bản b để biết nó được tạo nên từ những thành phần nào.</p>':'<h3>Em chọn văn bản a, có thể em thích sự gọn gàng.</h3><p>Nhưng hầu hết người đọc thấy văn bản b rõ ràng hơn. Em chạm vào 3 phần có số ①②③ trong văn bản b để biết vì sao.</p>';
    document.querySelectorAll('.vote').forEach(x=>x.classList.toggle('chosen',x===b));
+   if(found.size<3)document.querySelector('.doc.fancy').scrollIntoView({behavior:'smooth',block:'center'});
   });
   const reveal=el=>{
-   found.add(el.dataset.part);document.querySelector('#part-count').textContent=found.size;
-   document.querySelector('#part-note').textContent=notes[el.dataset.part];
+   found.add(el.dataset.part);el.classList.add('found');
    document.querySelectorAll('.part').forEach(x=>x.classList.toggle('on',x===el));
-   if(found.size===3){document.querySelector('#warm-next').hidden=false;document.querySelector('#finish-warmup').disabled=false}
+   count.textContent=found.size+'/3';
+   if(found.size===3){bar.classList.add('ready');text.textContent='Tuyệt vời! Em đã nhận ra cả 3 thành phần. Bấm “Tiếp tục” để học các thẻ định dạng.';finish.disabled=false}
+   else text.textContent=notes[el.dataset.part];
   };
-  document.querySelectorAll('.part').forEach(el=>{el.onclick=()=>reveal(el);el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();reveal(el)}}});
-  if(this.state.warmupDone){document.querySelector('#warm-parts').hidden=false;document.querySelector('#warm-next').hidden=false}
-  document.querySelector('#finish-warmup').onclick=()=>{this.state.warmupDone=true;this.save();location.hash='learning/0'};
+  document.querySelectorAll('.part').forEach(el=>{
+   if(found.has(el.dataset.part))el.classList.add('found');
+   el.onclick=()=>reveal(el);el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();reveal(el)}};
+  });
+  finish.onclick=()=>{this.state.warmupDone=true;this.save();location.hash='learning/0'};
  },
 
  /* ---------- Trang tổng kết mỗi phần ---------- */
